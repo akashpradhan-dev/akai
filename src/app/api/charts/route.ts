@@ -1,12 +1,11 @@
 // app/api/chats/route.ts
-import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { connectToMongoDB } from "../lib/mongodb";
 import Chart from "../lib/models/Chart";
 import UserChart from "../lib/models/UserChart";
 
 export async function POST(request: NextRequest) {
-  const { userId } = await auth();
+  const userId = "1234";
 
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

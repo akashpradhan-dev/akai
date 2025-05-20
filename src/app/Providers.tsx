@@ -2,7 +2,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ClerkProvider } from "@clerk/nextjs";
 const PUBLISHABLE_KEY =
-  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? "test_pk";
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ??
+  "pk_test_cHJvdmVuLWZpbmNoLTIzLmNsZXJrLmFjY291bnRzLmRldiQ";
 
 interface ProvidersProps {
   children: React.ReactNode;
