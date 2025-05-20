@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import oneDark from "react-syntax-highlighter/dist/esm/styles/prism/one-dark";
 import { Components } from "react-markdown";
 
 // Define a component to handle copy functionality
@@ -34,7 +34,12 @@ const CopyButton = ({ text }: { text: string }) => {
 // Define the MarkdownRenderer component
 export const Markdown = ({ content }: { content: string }) => {
   const components: Components = {
-    code({ inline = false, className, children, ...props }) {
+    code(props) {
+      const { className, children, inline } = props as {
+        className?: string;
+        children: React.ReactNode;
+        inline?: boolean;
+      };
       const language = className?.replace("language-", "") || "";
       const codeText = String(children).trim();
 
@@ -49,9 +54,7 @@ export const Markdown = ({ content }: { content: string }) => {
           <CopyButton text={codeText} />
           <SyntaxHighlighter
             language={language}
-            style={oneDark}
-            PreTag="div"
-            {...props}
+            style={oneDark as { [key: string]: React.CSSProperties }}
           >
             {codeText}
           </SyntaxHighlighter>
