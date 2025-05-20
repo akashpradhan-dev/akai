@@ -11,7 +11,9 @@ const queryClient = new QueryClient();
 export const Providers = ({ children }: ProvidersProps) => {
   return (
     <>
-      <ClerkProvider>
+      <ClerkProvider
+        publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      >
         <QueryClientProvider client={queryClient}>
           {children}
         </QueryClientProvider>
