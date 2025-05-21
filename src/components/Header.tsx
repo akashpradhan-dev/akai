@@ -10,11 +10,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { SignOutButton, useUser } from "@clerk/nextjs";
+// import { SignOutButton, useUser } from "@clerk/nextjs";
 import Image from "next/image";
 
 export const Header = () => {
-  const { isSignedIn, user, isLoaded } = useUser();
+  // const { isSignedIn, user, isLoaded } = useUser();
 
   return (
     <header className="flex items-center justify-between">
@@ -29,13 +29,13 @@ export const Header = () => {
         <span>Ak AI</span>
       </Link>
       <div className="user">
-        {isLoaded && isSignedIn && (
+        {true && (
           <DropdownMenu>
             <DropdownMenuTrigger>
               <Avatar>
                 {/* <AvatarImage src="https://github.com/shadcn.png" /> */}
                 <AvatarFallback>
-                  {user?.firstName?.slice(0, 2)?.toUpperCase()}
+                  {/* {user?.firstName?.slice(0, 2)?.toUpperCase()} */}
                 </AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
@@ -45,9 +45,9 @@ export const Header = () => {
               <DropdownMenuSeparator />
 
               <DropdownMenuItem>
-                <SignOutButton>
+                {/* <SignOutButton>
                   <button className="cursor-pointer">Sign out</button>
-                </SignOutButton>
+                </SignOutButton> */}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

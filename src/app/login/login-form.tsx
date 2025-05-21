@@ -1,13 +1,64 @@
+"use client";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { useSignInMutation } from "../services/mutation/login";
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<"div"> & {}) {
+interface LoginFormProps {
+  className?: string;
+}
+
+interface FormData {
+  email: string;
+  password: string;
+}
+
+export function LoginForm({ className, ...props }: LoginFormProps) {
+  const { login } = useAuth();
+  const router = useRouter();
+  const [formData, setFormData] = useState<FormData>({
+    email: "",
+    password: "",
+  });
+  const [error, setError] = useState<string | null>(null);
+
+  const { mutate, isPending } = useSignInMutation();
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = () => {
+    if (!formData.email || !formData.password) {
+      setError("Please fill in all fields");
+      return;
+    }
+    setError(null);
+    mutate(formData, {
+      onSuccess: (data) => {
+        login({
+          ...data,
+          email: formData.email,
+          name: data.data.name ?? "",
+        });
+        router.replace("/chart");
+      },
+      onError: (error) => {
+        console.error(error);
+        setError("Invalid email or password");
+      },
+    });
+  };
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
@@ -25,10 +76,14 @@ export function LoginForm({
                 <Input
                   id="email"
                   type="email"
+                  name="email"
                   placeholder="m@example.com"
+                  onChange={handleInputChange}
+                  value={formData?.email}
                   required
                 />
               </div>
+
               <div className="grid gap-3">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
@@ -39,10 +94,24 @@ export function LoginForm({
                     Forgot your password?
                   </a>
                 </div>
-                <Input id="password" type="password" required />
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  name="password"
+                  onChange={handleInputChange}
+                  value={formData?.password}
+                />
               </div>
-              <Button type="submit" className="w-full">
+              {error && <div className="text-red-500 text-sm">{error}</div>}
+              <Button
+                type="button"
+                onClick={handleSubmit}
+                className="w-full"
+                disabled={isPending}
+              >
                 Login
+                {isPending && "..."}
               </Button>
               <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                 <span className="bg-background text-muted-foreground relative z-10 px-2">

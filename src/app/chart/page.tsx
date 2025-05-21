@@ -6,6 +6,8 @@ import { NewChart } from "./NewChart";
 import { fetchAiResponse } from "../services/mutation/fetchStreamingResponse";
 import { Markdown } from "./Markdown";
 import Image from "next/image";
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 
 type Role = "user" | "bot";
 
@@ -15,10 +17,16 @@ interface Message {
 }
 
 const ChatPage = () => {
+  const router = useRouter();
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
   const [response, setResponse] = useState("");
   const [isError, setIsError] = useState(false);
   const [isPending, setIsPending] = useState(false);
+
+  const { user } = useAuth();
+  if (!user) {
+    router.replace("/login");
+  }
 
   const handleSendMessage = async (text: string) => {
     setIsPending(true);
