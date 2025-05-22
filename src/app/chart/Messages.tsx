@@ -30,7 +30,7 @@ export const Messages = ({ history }: MessagesProps) => {
             className={`p-5 rounded-2xl max-w-[80%] whitespace-pre-wrap ${
               message.role === "user"
                 ? "bg-[#2c2937] self-end text-white"
-                : "bg-gray-100 text-gray-800"
+                : "border border-[#2c2937]"
             }`}
           >
             <MarkdownWithSyntaxHighlight markdownText={message.parts[0].text} />

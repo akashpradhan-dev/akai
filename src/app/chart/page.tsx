@@ -16,6 +16,7 @@ interface Message {
   role: Role;
   parts: { text: string }[];
 }
+const MAX_CHAT_MESSAGES = 20;
 
 const ChatPage = () => {
   const router = useRouter();
@@ -23,6 +24,8 @@ const ChatPage = () => {
   const [response, setResponse] = useState("");
   const [isError, setIsError] = useState(false);
   const [isPending, setIsPending] = useState(false);
+  const [currentChatCount, setCurrentChatCount] = useState(0);
+  const [showLimitMessage, setShowLimitMessage] = useState(false);
 
   const { user, loading, token } = useAuth();
 
@@ -32,11 +35,54 @@ const ChatPage = () => {
     }
   }, [loading, user, router]);
 
+  useEffect(() => {
+    const storedCount = localStorage.getItem("chatCount");
+    if (storedCount) {
+      try {
+        const count = JSON.parse(storedCount);
+        if (typeof count === "number" && count >= 0) {
+          setCurrentChatCount(count); // Set the loaded count
+          if (count >= MAX_CHAT_MESSAGES) {
+            setShowLimitMessage(true);
+          }
+        } else {
+          console.warn(
+            "Stored chat count is malformed or not a valid number. Resetting to 0."
+          );
+          localStorage.setItem("chatCount", JSON.stringify(0)); // Reset bad data
+          setCurrentChatCount(0);
+          setShowLimitMessage(false);
+        }
+      } catch (e) {
+        console.error("Failed to parse chat count from localStorage:", e);
+        localStorage.setItem("chatCount", JSON.stringify(0)); // Clear corrupted data
+        setCurrentChatCount(0);
+        setShowLimitMessage(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("chatCount", JSON.stringify(currentChatCount));
+
+    // Update showLimitMessage based on current chat count
+    if (currentChatCount >= MAX_CHAT_MESSAGES) {
+      setShowLimitMessage(true);
+    } else {
+      setShowLimitMessage(false);
+    }
+  }, [currentChatCount]);
+
   if (loading || !user?.email) {
     return <div>Checking authentication...</div>;
   }
 
   const handleSendMessage = async (text: string) => {
+    if (currentChatCount >= MAX_CHAT_MESSAGES) {
+      setShowLimitMessage(true); // Ensure message is visible
+      return; // Stop function execution
+    }
+
     setIsPending(true);
     setIsError(false);
     setResponse("");
@@ -74,6 +120,8 @@ const ChatPage = () => {
           parts: [{ text: fullResponse }],
         },
       ]);
+
+      setCurrentChatCount((prevCount) => prevCount + 1);
     } catch (err) {
       console.error("Streaming error:", err);
       setIsError(true);
@@ -92,7 +140,7 @@ const ChatPage = () => {
               <Image
                 src="/logo2.jpg"
                 alt="Logo"
-                className="w-24 h-24 mb-4"
+                className="w-24 h-24 mb-4 rounded-full"
                 width={220}
                 height={220}
               />
@@ -121,8 +169,18 @@ const ChatPage = () => {
             </div>
           )}
 
+          {/* Chat Limit Message */}
+          {showLimitMessage && (
+            <div className="flex flex-col gap-2 my-2">
+              <div className="p-4 rounded-lg bg-yellow-100 text-yellow-800 border border-yellow-300 text-center">
+                You have reached the limit of {MAX_CHAT_MESSAGES} messages.
+                Please
+              </div>
+            </div>
+          )}
+
           {/* Input Area */}
-          <div className="sticky bottom-2 w-full bg-white py-3 rounded-2xl shadow-md">
+          <div className="sticky bottom-2 w-full py-3 rounded-2xl shadow-md">
             <NewChart
               onSend={handleSendMessage}
               onClear={() => {

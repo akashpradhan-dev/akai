@@ -14,8 +14,10 @@ export async function POST(request: NextRequest) {
 
   try {
     if (
-      email === process.env.ADMIN_EMAIL &&
-      password === process.env.ADMIN_PASSWORD
+      (email === process.env.ADMIN_EMAIL ||
+        process.env.NEXT_PUBLIC_GUEST_EMAIL) &&
+      (password === process.env.ADMIN_PASSWORD ||
+        process.env.NEXT_PUBLIC_GUEST_PASSWORD)
     ) {
       const token = jwt.sign({ email }, process.env.JWT_SECRET!, {
         expiresIn: "1h",
@@ -27,7 +29,8 @@ export async function POST(request: NextRequest) {
           token,
           data: {
             email,
-            name: "Akash",
+            name:
+              email === process.env.NEXT_PUBLIC_GUEST_EMAIL ? "Guest" : "Akash",
           },
         },
         { status: 200 }

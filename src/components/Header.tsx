@@ -51,7 +51,9 @@ export const Header = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent className="p-2 w-56 cursor-pointer">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuItem>{user?.email}</DropdownMenuItem>
+
+              <DropdownMenuItem>Name: {user?.name}</DropdownMenuItem>
+              <DropdownMenuItem>Email: {user?.email}</DropdownMenuItem>
 
               <DropdownMenuSeparator />
 
