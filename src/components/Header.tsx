@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import {
   DropdownMenu,
@@ -10,11 +10,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-// import { SignOutButton, useUser } from "@clerk/nextjs";
 import Image from "next/image";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "./ui/button";
+import { useRouter } from "next/navigation";
 
 export const Header = () => {
-  // const { isSignedIn, user, isLoaded } = useUser();
+  const { user, logout, loading } = useAuth();
+  const [name, setName] = React.useState<string | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (user) {
+      setName(user.name);
+    }
+  }, [loading, user, router]);
 
   return (
     <header className="flex items-center justify-between">
@@ -26,28 +36,36 @@ export const Header = () => {
           width={100}
           height={100}
         />
-        <span>Ak AI</span>
+        <span>AKAI</span>
       </Link>
       <div className="user">
-        {true && (
+        {name && (
           <DropdownMenu>
             <DropdownMenuTrigger>
               <Avatar>
                 {/* <AvatarImage src="https://github.com/shadcn.png" /> */}
                 <AvatarFallback>
-                  {/* {user?.firstName?.slice(0, 2)?.toUpperCase()} */}
+                  {name?.slice(0, 2)?.toUpperCase()}
                 </AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="p-2 w-56 cursor-pointer">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuItem>{user?.email}</DropdownMenuItem>
 
               <DropdownMenuSeparator />
 
               <DropdownMenuItem>
-                {/* <SignOutButton>
-                  <button className="cursor-pointer">Sign out</button>
-                </SignOutButton> */}
+                <Button
+                  onClick={() => {
+                    logout();
+                    router.replace("/login");
+                    setName(null);
+                  }}
+                  className="w-full"
+                >
+                  Logout
+                </Button>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

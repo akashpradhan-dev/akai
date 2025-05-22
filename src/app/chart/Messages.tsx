@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Markdown } from "./Markdown";
+import { MarkdownWithSyntaxHighlight } from "./Markdown";
 
 type Role = "user" | "bot";
 
@@ -33,7 +33,7 @@ export const Messages = ({ history }: MessagesProps) => {
                 : "bg-gray-100 text-gray-800"
             }`}
           >
-            <Markdown content={message.parts[0].text} />
+            <MarkdownWithSyntaxHighlight markdownText={message.parts[0].text} />
           </div>
         </div>
       ))}

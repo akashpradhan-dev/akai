@@ -1,71 +1,49 @@
-"use client";
-
-import React, { useState } from "react";
+import { useMemo } from "react";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import oneDark from "react-syntax-highlighter/dist/esm/styles/prism/one-dark";
-import { Components } from "react-markdown";
+import { nightOwl as dark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import type { Components } from "react-markdown";
 
-// Define a component to handle copy functionality
-const CopyButton = ({ text }: { text: string }) => {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch (err) {
-      console.error("Copy failed", err);
-    }
-  };
-
-  return (
-    <button
-      onClick={handleCopy}
-      className="absolute top-2 right-2 text-xs px-2 py-1 rounded bg-gray-700 text-white opacity-0 group-hover:opacity-100 transition"
-    >
-      {copied ? "Copied!" : "Copy"}
-    </button>
-  );
+type Props = {
+  markdownText: string;
 };
 
-// Define the MarkdownRenderer component
-export const Markdown = ({ content }: { content: string }) => {
-  const components: Components = {
-    code(props) {
-      const { className, children, inline } = props as {
-        className?: string;
-        children: React.ReactNode;
-        inline?: boolean;
-      };
-      const language = className?.replace("language-", "") || "";
-      const codeText = String(children).trim();
+interface CodeProps {
+  inline?: boolean;
+  className?: string;
+  children: React.ReactNode;
+}
 
-      if (inline) {
+export function MarkdownWithSyntaxHighlight({ markdownText }: Props) {
+  const components: Components = useMemo(
+    () => ({
+      code(props) {
+        const { inline, className, children, ...rest } = props as CodeProps;
+        const match = /language-(\w+)/.exec(className || "");
+
+        if (!inline && match) {
+          return (
+            <SyntaxHighlighter
+              {...rest}
+              // @ts-expect-error: materialDark type does not exactly match expected style shape, but it works at runtime
+              style={dark}
+              language={match[1]}
+              PreTag="div"
+              {...props}
+            >
+              {String(children).replace(/\n$/, "")}
+            </SyntaxHighlighter>
+          );
+        }
         return (
-          <code className="bg-gray-200 px-1 rounded text-sm">{children}</code>
+          <code className={className} {...rest}>
+            {children}
+          </code>
         );
-      }
-
-      return (
-        <div className="relative group my-4">
-          <CopyButton text={codeText} />
-          <SyntaxHighlighter
-            language={language}
-            style={oneDark as { [key: string]: React.CSSProperties }}
-          >
-            {codeText}
-          </SyntaxHighlighter>
-        </div>
-      );
-    },
-  };
-
-  return (
-    <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-      {content}
-    </ReactMarkdown>
+      },
+    }),
+    []
   );
-};
+
+  return <ReactMarkdown components={components}>{markdownText}</ReactMarkdown>;
+}

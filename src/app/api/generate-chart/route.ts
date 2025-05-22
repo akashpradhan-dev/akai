@@ -7,29 +7,71 @@ const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 export async function POST(req: NextRequest) {
   const authHeader = req.headers.get("Authorization");
   if (!authHeader) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Unauthorized: no header" },
+      { status: 401 }
+    );
   }
   const token = authHeader.split(" ")[1];
   if (!token) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Unauthorized: no token" },
+      { status: 401 }
+    );
   }
   try {
-    const decode = jwt.verify(token, process.env.NEXT_PUBLIC_JWT_SECRET!);
+    const decode = jwt.verify(token, process.env.JWT_SECRET!);
     if (!decode) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Unauthorized: invalid token" },
+        { status: 401 }
+      );
     }
 
-    const { content } = await req.json();
-    if (!content) {
+    const { content: message, history } = await req.json();
+    if (!message) {
       return NextResponse.json(
         { error: "No content provided" },
         { status: 400 }
       );
     }
 
+    const contents = [];
+
+    contents.push({
+      role: "user",
+      parts: [
+        {
+          text:
+            "You are a concise and professional technical assistant. When responding to developers:\n" +
+            "- Prioritize clarity and relevance.\n" +
+            "- Avoid unnecessary introductions or filler.\n" +
+            "- Keep responses direct and actionable.\n" +
+            "- Format code correctly and keep answers minimal unless asked.",
+        },
+      ],
+    });
+
+    if (Array.isArray(history)) {
+      for (const message of history) {
+        const role = message.role === "bot" ? "model" : message.role;
+
+        contents.push({
+          role: role,
+          parts: message.parts,
+        });
+      }
+    }
+
+    // Append current user prompt last
+    contents.push({
+      role: "user",
+      parts: [{ text: message }],
+    });
+
     const response = await genAI.models.generateContentStream({
       model: "gemini-2.0-flash",
-      contents: [{ role: "user", parts: [{ text: content }] }],
+      contents,
     });
 
     const encode = new TextEncoder();
@@ -57,6 +99,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized error" }, { status: 401 });
   }
 }

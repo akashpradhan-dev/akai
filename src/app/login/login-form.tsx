@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useSignInMutation } from "../services/mutation/login";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface LoginFormProps {
   className?: string;
@@ -45,11 +46,16 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
     setError(null);
     mutate(formData, {
       onSuccess: (data) => {
+        toast.success("Login successful", {
+          position: "top-right",
+          richColors: true,
+        });
         login({
           ...data,
           email: formData.email,
           name: data.data.name ?? "",
         });
+
         router.replace("/chart");
       },
       onError: (error) => {

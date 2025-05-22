@@ -8,6 +8,7 @@ interface WithToken extends User {
 
 interface UseAuthReturn {
   user: User | WithToken | null;
+  token: string | null;
   loading: boolean;
   login: (user: WithToken) => Promise<void>;
   logout: () => void;
@@ -15,29 +16,36 @@ interface UseAuthReturn {
 
 export function useAuth(): UseAuthReturn {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // Simulate fetching user from localStorage or API
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    const storedToken = localStorage.getItem("token");
+    if (storedUser && storedToken) {
+      const parsedUser = JSON.parse(storedUser);
+      const parsedToken = storedToken;
+      setUser({ ...parsedUser });
+      setToken(parsedToken);
     }
     setLoading(false);
   }, []);
 
-  const login = useCallback(async (user: WithToken) => {
+  const login = async (user: WithToken) => {
     setLoading(true);
-    setUser(user);
 
     const userData = user.data;
+    const token = user.token;
 
+    // Save plain user and token
     localStorage.setItem("user", JSON.stringify(userData));
-    if (user.token) {
-      localStorage.setItem("token", user.token);
-    }
+    localStorage.setItem("token", token);
+
+    setUser({ ...userData });
+    setToken(token);
     setLoading(false);
-  }, []);
+  };
 
   const logout = useCallback(() => {
     setUser(null);
@@ -45,5 +53,5 @@ export function useAuth(): UseAuthReturn {
     localStorage.removeItem("token");
   }, []);
 
-  return { user, loading, login, logout };
+  return { user, token, loading, login, logout };
 }

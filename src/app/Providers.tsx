@@ -16,6 +16,7 @@ export const Providers = ({ children }: ProvidersProps) => {
     <>
       {/* <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/"> */}
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+
       {/* </ClerkProvider> */}
     </>
   );
