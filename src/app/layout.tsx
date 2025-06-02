@@ -38,9 +38,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <div className="px-16 py-4 h-screen flex flex-col">
-              <main className="w-full">{children}</main>
-            </div>
+            <main className="w-full">{children}</main>
 
             <Toaster />
           </ThemeProvider>

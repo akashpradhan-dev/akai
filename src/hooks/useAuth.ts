@@ -1,23 +1,33 @@
-import { User } from "@/app/services/mutation/login";
 import { useState, useEffect, useCallback } from "react";
 
-interface WithToken extends User {
-  data: User;
+// interface WithToken extends User {
+//   data: User;
+//   token: string;
+// }
+
+// interface UseAuthReturn {
+//   user: User | WithToken | null;
+//   token: string | null;
+//   loading: boolean;
+//   login: (user: WithToken) => Promise<void>;
+//   logout: () => void;
+// }
+
+interface User {
+  id?: string;
+  email: string;
+  name: string;
+}
+
+interface LoginParams {
+  user: User;
   token: string;
 }
 
-interface UseAuthReturn {
-  user: User | WithToken | null;
-  token: string | null;
-  loading: boolean;
-  login: (user: WithToken) => Promise<void>;
-  logout: () => void;
-}
-
-export function useAuth(): UseAuthReturn {
+export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [token, setToken] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Simulate fetching user from localStorage or API
@@ -32,17 +42,14 @@ export function useAuth(): UseAuthReturn {
     setLoading(false);
   }, []);
 
-  const login = async (user: WithToken) => {
+  const login = async ({ user, token }: LoginParams) => {
     setLoading(true);
 
-    const userData = user.data;
-    const token = user.token;
-
     // Save plain user and token
-    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("user", JSON.stringify(user));
     localStorage.setItem("token", token);
 
-    setUser({ ...userData });
+    setUser(user);
     setToken(token);
     setLoading(false);
   };

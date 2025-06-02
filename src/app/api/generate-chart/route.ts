@@ -1,33 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
-import jwt from "jsonwebtoken";
 
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
 export async function POST(req: NextRequest) {
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader) {
+  const token = req.headers.get("Authorization");
+  if (!token) {
     return NextResponse.json(
       { error: "Unauthorized: no header" },
       { status: 401 }
     );
   }
-  const token = authHeader.split(" ")[1];
-  if (!token) {
-    return NextResponse.json(
-      { error: "Unauthorized: no token" },
-      { status: 401 }
-    );
-  }
   try {
-    const decode = jwt.verify(token, process.env.JWT_SECRET!);
-    if (!decode) {
-      return NextResponse.json(
-        { error: "Unauthorized: invalid token" },
-        { status: 401 }
-      );
-    }
-
     const { content: message, history } = await req.json();
     if (!message) {
       return NextResponse.json(

@@ -43,17 +43,25 @@ export const Header = () => {
           <DropdownMenu>
             <DropdownMenuTrigger>
               <Avatar>
-                {/* <AvatarImage src="https://github.com/shadcn.png" /> */}
                 <AvatarFallback>
                   {name?.slice(0, 2)?.toUpperCase()}
                 </AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="p-2 w-56 cursor-pointer">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-
-              <DropdownMenuItem>Name: {user?.name}</DropdownMenuItem>
-              <DropdownMenuItem>Email: {user?.email}</DropdownMenuItem>
+              <DropdownMenuLabel>
+                <div className="flex items-center gap-2">
+                  <Avatar className="w-8 h-8">
+                    <AvatarFallback>
+                      {name?.slice(0, 2)?.toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <span className="font-semibold">{user?.name}</span>
+                    <div className="text-xs text-gray-500">{user?.email}</div>
+                  </div>
+                </div>
+              </DropdownMenuLabel>
 
               <DropdownMenuSeparator />
 
