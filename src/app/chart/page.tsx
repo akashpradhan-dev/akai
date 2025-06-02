@@ -16,7 +16,6 @@ interface Message {
   role: Role;
   parts: { text: string }[];
 }
-const MAX_CHAT_MESSAGES = 20;
 
 const ChatPage = () => {
   const router = useRouter();
@@ -24,8 +23,6 @@ const ChatPage = () => {
   const [response, setResponse] = useState("");
   const [isError, setIsError] = useState(false);
   const [isPending, setIsPending] = useState(false);
-  const [currentChatCount, setCurrentChatCount] = useState(0);
-  const [showLimitMessage, setShowLimitMessage] = useState(false);
 
   const { user, loading, token } = useAuth();
 
@@ -35,54 +32,11 @@ const ChatPage = () => {
     }
   }, [loading, user, router]);
 
-  useEffect(() => {
-    const storedCount = localStorage.getItem("chatCount");
-    if (storedCount) {
-      try {
-        const count = JSON.parse(storedCount);
-        if (typeof count === "number" && count >= 0) {
-          setCurrentChatCount(count); // Set the loaded count
-          if (count >= MAX_CHAT_MESSAGES) {
-            setShowLimitMessage(true);
-          }
-        } else {
-          console.warn(
-            "Stored chat count is malformed or not a valid number. Resetting to 0."
-          );
-          localStorage.setItem("chatCount", JSON.stringify(0)); // Reset bad data
-          setCurrentChatCount(0);
-          setShowLimitMessage(false);
-        }
-      } catch (e) {
-        console.error("Failed to parse chat count from localStorage:", e);
-        localStorage.setItem("chatCount", JSON.stringify(0)); // Clear corrupted data
-        setCurrentChatCount(0);
-        setShowLimitMessage(false);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("chatCount", JSON.stringify(currentChatCount));
-
-    // Update showLimitMessage based on current chat count
-    if (currentChatCount >= MAX_CHAT_MESSAGES) {
-      setShowLimitMessage(true);
-    } else {
-      setShowLimitMessage(false);
-    }
-  }, [currentChatCount]);
-
   if (loading || !user?.email) {
     return <div>Checking authentication...</div>;
   }
 
   const handleSendMessage = async (text: string) => {
-    if (currentChatCount >= MAX_CHAT_MESSAGES) {
-      setShowLimitMessage(true); // Ensure message is visible
-      return; // Stop function execution
-    }
-
     setIsPending(true);
     setIsError(false);
     setResponse("");
@@ -120,8 +74,6 @@ const ChatPage = () => {
           parts: [{ text: fullResponse }],
         },
       ]);
-
-      setCurrentChatCount((prevCount) => prevCount + 1);
     } catch (err) {
       console.error("Streaming error:", err);
       setIsError(true);
@@ -133,8 +85,10 @@ const ChatPage = () => {
 
   return (
     <Layout>
-      <div className="flex flex-col items-center w-full h-full">
-        <div className="flex-1 w-full max-w-4xl px-4 py-4">
+      <div className="flex flex-col items-center w-full h-screen overflow-hidden">
+        {/* Scrollable Content Area */}
+        <div className="flex-1 w-full max-w-4xl px-4 py-4 overflow-y-auto mb-40">
+          {/* mb-28 adds bottom spacing to avoid overlap with input */}
           {chatHistory.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full">
               <Image
@@ -150,16 +104,13 @@ const ChatPage = () => {
               </p>
             </div>
           )}
-
           <Messages history={chatHistory} />
-
-          {/* Show bot typing message if streaming */}
+          {/* Bot Typing Message */}
           {response && (
             <div className="flex flex-col gap-2">
               <MarkdownWithSyntaxHighlight markdownText={response} />
             </div>
           )}
-
           {/* Error Message */}
           {isError && (
             <div className="flex flex-col gap-2">
@@ -168,19 +119,11 @@ const ChatPage = () => {
               </div>
             </div>
           )}
+        </div>
 
-          {/* Chat Limit Message */}
-          {showLimitMessage && (
-            <div className="flex flex-col gap-2 my-2">
-              <div className="p-4 rounded-lg bg-yellow-100 text-yellow-800 border border-yellow-300 text-center">
-                You have reached the limit of {MAX_CHAT_MESSAGES} messages.
-                Please
-              </div>
-            </div>
-          )}
-
-          {/* Input Area */}
-          <div className="sticky bottom-2 w-full py-3 rounded-2xl shadow-md">
+        {/* Fixed Input Area */}
+        <div className="fixed bottom-2 left-1/2 transform -translate-x-1/2 w-full max-w-4xl px-4 z-50">
+          <div className="bg-background py-3 px-4 rounded-2xl shadow-md w-full">
             <NewChart
               onSend={handleSendMessage}
               onClear={() => {

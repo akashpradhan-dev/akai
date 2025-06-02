@@ -27,7 +27,7 @@ export const Header = () => {
   }, [loading, user, router]);
 
   return (
-    <header className="flex items-center justify-between">
+    <header className="flex bg-background items-center justify-between fixed top-0 left-0 right-0 z-50 shadow-md px-4 py-2">
       <Link href="/" className="flex items-center font-bold gap-2">
         <Image
           src="/logo2.jpg"
