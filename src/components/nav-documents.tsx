@@ -43,6 +43,13 @@ export function NavDocuments({ items }: NavDocumentsProps) {
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>History</SidebarGroupLabel>
       <SidebarMenu>
+        {items.length === 0 && (
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <span className="text-muted-foreground">No history found</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        )}
         {items.map((item) => (
           <SidebarMenuItem key={item.id}>
             <SidebarMenuButton asChild>
