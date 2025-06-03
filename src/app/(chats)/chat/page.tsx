@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import { Messages } from "./Messages";
 import { NewChart } from "./NewChart";
-import { fetchAiResponse } from "../services/mutation/fetchStreamingResponse";
+import { fetchAiResponse } from "../../services/mutation/fetchStreamingResponse";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import Layout from "./customlayout";
 import { MarkdownWithSyntaxHighlight } from "./Markdown";
+import { supabase } from "@/utils/superbase/client";
 
 type Role = "user" | "bot";
 
@@ -65,6 +66,18 @@ const ChatPage = () => {
         },
         [...chatHistory.slice(-5)]
       );
+
+      // update the title with 1st message asked
+      if (chatHistory.length === 0) {
+        const title = fullResponse.slice(0, 50).trim();
+
+        const { error } = await supabase
+          .from("history")
+          .insert({ title: title, user_id: user.id });
+        if (error) {
+          console.error("Error saving history:", error);
+        }
+      }
 
       // After stream ends, save bot message
       setChatHistory((prev) => [

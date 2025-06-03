@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import React, { useState } from "react";
+import { Prompts } from "./new/Prompts";
 
 interface NewChartProps {
   onSend: (text: string) => void;
@@ -12,15 +12,18 @@ interface NewChartProps {
 export const NewChart = ({ onSend, onClear, isPending }: NewChartProps) => {
   const [value, setValue] = useState("");
   return (
-    <div className="flex w-full p-3 cursor-text flex-col items-center justify-center rounded-lg bg-clip-padding contain-inline-size  shadow-sm sm:shadow-lg dark:shadow-none! dark:bg-[#303030]">
-      <Textarea
+    <div className="flex w-full cursor-text flex-col items-center justify-center rounded-lg bg-clip-padding contain-inline-size  shadow-sm sm:shadow-lg dark:shadow-none!">
+      <textarea
+        rows={3}
         placeholder="Type your message here."
         value={value}
         onChange={(e) => setValue(e.target.value)}
+        className="w-full resize-none rounded-md border p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
-      <div className="flex gap-2 w-full items-center justify-center ">
+      <div className="flex gap-2 mt-4 w-full items-center justify-center flex-col md:flex-row">
+        <Prompts />
         <Button
-          className="mt-4 w-full flex-1"
+          className="w-full md:flex-1"
           variant="default"
           onClick={() => {
             onSend(value);
@@ -44,7 +47,7 @@ export const NewChart = ({ onSend, onClear, isPending }: NewChartProps) => {
           )}
         </Button>
         <Button
-          className="mt-4"
+          className="w-full flex md:w-36"
           variant="outline"
           onClick={() => {
             onClear();

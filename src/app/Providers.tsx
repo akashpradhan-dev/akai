@@ -1,4 +1,5 @@
 "use client";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 // import { ClerkProvider } from "@clerk/nextjs";
 // const PUBLISHABLE_KEY =
@@ -14,10 +15,9 @@ const queryClient = new QueryClient();
 export const Providers = ({ children }: ProvidersProps) => {
   return (
     <>
-      {/* <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/"> */}
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-
-      {/* </ClerkProvider> */}
+      <QueryClientProvider client={queryClient}>
+        <SidebarProvider>{children}</SidebarProvider>
+      </QueryClientProvider>
     </>
   );
 };
