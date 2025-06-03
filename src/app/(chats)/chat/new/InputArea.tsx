@@ -47,14 +47,14 @@ export const InputArea = ({ onSend, onClear, isPending }: InputAreaProps) => {
           )}
         </Button>
         <Button
-          className="w-full flex md:w-36"
+          className="w-full flex md:w-16"
           variant="outline"
           onClick={() => {
             onClear();
           }}
           disabled={isPending}
         >
-          clear
+          New
         </Button>
       </div>
     </div>

@@ -1,18 +1,11 @@
 "use client";
 
-import {
-  IconCreditCard,
-  IconDotsVertical,
-  IconLogout,
-  IconNotification,
-  IconUserCircle,
-} from "@tabler/icons-react";
+import { IconDotsVertical, IconLogout } from "@tabler/icons-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -25,11 +18,22 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/utils/superbase/client";
+import { useRouter } from "next/navigation";
 
 export function NavUser() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { isMobile } = useSidebar();
-
+  const router = useRouter();
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      logout();
+      router.replace("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -73,24 +77,11 @@ export function NavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <IconUserCircle />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconCreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconNotification />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
+
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <IconLogout />
-              Log out
+              <button onClick={handleLogout}>Log out</button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

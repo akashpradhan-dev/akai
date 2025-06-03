@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  IconDots,
-  IconFolder,
-  IconShare3,
-  IconTrash,
-} from "@tabler/icons-react";
+import { IconDots, IconFolder, IconTrash } from "@tabler/icons-react";
 
 import {
   DropdownMenu,
@@ -62,10 +57,7 @@ export function NavDocuments({ items }: NavDocumentsProps) {
                   <IconFolder />
                   <span>Open</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <IconShare3 />
-                  <span>Share</span>
-                </DropdownMenuItem>
+
                 <DropdownMenuSeparator />
                 <DropdownMenuItem variant="destructive">
                   <IconTrash />

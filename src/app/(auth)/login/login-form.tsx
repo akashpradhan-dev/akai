@@ -75,7 +75,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
         token,
       });
 
-      router.replace("/chat");
+      router.replace("/chat/new");
     } catch (error) {
       console.log("Error during login:", error);
       setError("An unexpected error occurred. Please try again.");

@@ -41,6 +41,7 @@ export function AppSidebar({ history, loading, ...props }: AppSidebarProps) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+
       <SidebarContent>
         {loading ? <Spinner /> : <NavDocuments items={history ?? []} />}
       </SidebarContent>
