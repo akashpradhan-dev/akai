@@ -36,10 +36,14 @@ const prompts = [
   },
 ];
 
-export function Prompts() {
+interface PromptsProps {
+  value?: string;
+  onChange?: (value: string) => void;
+}
+export function Prompts({ value, onChange }: PromptsProps) {
   return (
     <>
-      <Select>
+      <Select value={value} onValueChange={onChange}>
         <SelectTrigger className="w-full md:w-72">
           <SelectValue placeholder="Select a prompt" />
         </SelectTrigger>

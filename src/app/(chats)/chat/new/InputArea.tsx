@@ -11,6 +11,8 @@ interface InputAreaProps {
 
 export const InputArea = ({ onSend, onClear, isPending }: InputAreaProps) => {
   const [value, setValue] = useState("");
+  const [prompt, setPrompt] = useState("");
+
   return (
     <div className="flex w-full cursor-text flex-col items-center justify-center rounded-lg bg-clip-padding contain-inline-size  shadow-sm sm:shadow-lg dark:shadow-none!">
       <textarea
@@ -21,12 +23,12 @@ export const InputArea = ({ onSend, onClear, isPending }: InputAreaProps) => {
         className="w-full resize-none rounded-md border p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
       <div className="flex gap-2 mt-4 w-full items-center justify-center flex-col md:flex-row">
-        <Prompts />
+        <Prompts onChange={setPrompt} value={prompt} />
         <Button
           className="w-full md:flex-1"
           variant="default"
           onClick={() => {
-            onSend(value);
+            onSend(`${prompt} ${value}`.trim());
             setValue("");
           }}
           disabled={isPending}
