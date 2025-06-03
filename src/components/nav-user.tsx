@@ -78,10 +78,9 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
 
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
               <IconLogout />
-              <button onClick={handleLogout}>Log out</button>
+              Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
