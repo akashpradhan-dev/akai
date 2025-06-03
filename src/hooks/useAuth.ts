@@ -36,7 +36,7 @@ export function useAuth() {
     if (storedUser && storedToken) {
       const parsedUser = JSON.parse(storedUser);
       const parsedToken = storedToken;
-      setUser({ ...parsedUser });
+      setUser(parsedUser);
       setToken(parsedToken);
     }
     setLoading(false);

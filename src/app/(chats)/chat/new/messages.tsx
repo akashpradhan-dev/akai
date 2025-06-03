@@ -3,13 +3,13 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { NewChart } from "../NewChart";
 import { MarkdownWithSyntaxHighlight } from "../Markdown";
 
 import { useAuth } from "@/hooks/useAuth";
 import { fetchAiResponse } from "@/app/services/mutation/fetchStreamingResponse";
 import { supabase } from "@/utils/superbase/client";
 import { Message } from "./message";
+import { InputArea } from "./InputArea";
 
 type Role = "user" | "bot";
 
@@ -129,7 +129,7 @@ export const Messages = () => {
       </div>
 
       <div className="sticky bottom-0 z-50 bg-background p-4">
-        <NewChart
+        <InputArea
           onSend={handleSendMessage}
           onClear={() => setChatHistory([])}
           isPending={isPending}
