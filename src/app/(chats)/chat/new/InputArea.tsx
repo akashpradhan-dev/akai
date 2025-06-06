@@ -32,7 +32,7 @@ export const InputArea = ({ onSend, onClear, isPending }: InputAreaProps) => {
             onSend(`${prompt} ${value}`.trim());
             setValue("");
           }}
-          disabled={true}
+          disabled={isPending}
         >
           Generate {isPending && <Spinner />}
         </Button>

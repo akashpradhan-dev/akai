@@ -11,15 +11,16 @@ const saveHistory = async ({
   title,
   userId,
 }: SaveHistory): Promise<History[]> => {
-  const response = await supabase
+  const { data, error } = await supabase
     .from("history")
-    .insert({ title, user_id: userId });
+    .insert({ title, user_id: userId })
+    .select();
 
-  if (!response) {
-    throw new Error("Failed to generate chart");
+  if (error) {
+    throw new Error(error.message);
   }
 
-  return response?.data || [];
+  return data;
 };
 
 export const useHistoryMutation = () => {
