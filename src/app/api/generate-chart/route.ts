@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
         {
           text:
             "You are a concise and professional technical assistant. When responding to developers:\n" +
+            "- First, generate a brief and relevant context of the user's request for title of the content.\n" +
             "- Prioritize clarity and relevance.\n" +
             "- Avoid unnecessary introductions or filler.\n" +
             "- Keep responses direct and actionable.\n" +

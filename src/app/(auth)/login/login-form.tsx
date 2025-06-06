@@ -10,7 +10,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Image from "next/image";
 import Link from "next/link";
-import { supabase } from "@/utils/superbase/client";
+import { useLogInMutation } from "@/services/mutation/login";
+import { Spinner } from "@/components/Spinner";
 
 interface LoginFormProps {
   className?: string;
@@ -23,8 +24,9 @@ interface FormData {
 
 export function LoginForm({ className, ...props }: LoginFormProps) {
   const { login } = useAuth();
+  const { mutate, isPending, error: loginError, isError } = useLogInMutation();
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
@@ -41,46 +43,47 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
 
   const handleSubmit = async () => {
     try {
-      setLoading(true);
       if (!formData.email || !formData.password) {
         setError("Please fill in all fields");
         return;
       }
       setError(null);
+      mutate(
+        {
+          email: formData.email,
+          password: formData.password,
+        },
+        {
+          onSuccess: (data) => {
+            toast.success("Login successful", {
+              position: "top-right",
+              richColors: true,
+            });
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      });
+            const token = data.session?.access_token;
 
-      if (error) {
-        console.error("Supabase sign-in error:", error);
-        setError("Invalid email or password");
-        return;
-      }
+            const user = {
+              email: data?.user?.email ?? "",
+              name: data?.user?.user_metadata.name ?? "",
+              id: data?.user?.id,
+            };
 
-      toast.success("Login successful", {
-        position: "top-right",
-        richColors: true,
-      });
-      const token = data.session.access_token;
-      const user = {
-        email: data.user.email ?? "",
-        name: data.user.user_metadata.name ?? "",
-        id: data.user.id,
-      };
+            if (!token || !user.id) {
+              setError("Login failed. Please try again.");
+              return;
+            }
 
-      login({
-        user,
-        token,
-      });
+            login({
+              user,
+              token,
+            });
 
-      router.replace("/chat/new");
+            router.replace("/chat/new");
+          },
+        }
+      );
     } catch (error) {
       console.log("Error during login:", error);
-      setError("An unexpected error occurred. Please try again.");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -91,9 +94,9 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
           <form className="p-6 md:p-8">
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold">Welcome back</h1>
+                <h1 className="text-2xl font-bold">Login</h1>
                 <p className="text-muted-foreground text-balance">
-                  Login to continue your journey
+                  Welcome back! Please login to continue.
                 </p>
               </div>
               <div className="grid gap-3">
@@ -126,17 +129,23 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
                   name="password"
                   onChange={handleInputChange}
                   value={formData?.password}
+                  placeholder="********"
                 />
               </div>
               {error && <div className="text-red-500 text-sm">{error}</div>}
+              {isError && (
+                <div className="text-red-500 text-sm">
+                  {loginError?.message || "Login failed. Please try again."}
+                </div>
+              )}
               <Button
                 type="button"
                 onClick={handleSubmit}
                 className="w-full"
-                disabled={loading}
+                disabled={isPending}
               >
                 Login
-                {loading && "..."}
+                {isPending && <Spinner className="h-4 w-4" />}
               </Button>
 
               <span className="text-center text-sm">

@@ -6,10 +6,10 @@ import Image from "next/image";
 import { MarkdownWithSyntaxHighlight } from "../Markdown";
 
 import { useAuth } from "@/hooks/useAuth";
-import { fetchAiResponse } from "@/app/services/mutation/fetchStreamingResponse";
-import { supabase } from "@/utils/superbase/client";
+import { fetchAiResponse } from "@/services/mutation/fetchStreamingResponse";
 import { Message } from "./message";
 import { InputArea } from "./InputArea";
+import { useHistoryMutation } from "@/services/mutation/saveHistory";
 
 type Role = "user" | "bot";
 
@@ -23,9 +23,10 @@ export const Messages = () => {
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
   const [response, setResponse] = useState("");
   const [isError, setIsError] = useState(false);
-  const [isPending, setIsPending] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { user, loading, token } = useAuth();
+  const { isPending, mutate } = useHistoryMutation();
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -41,16 +42,15 @@ export const Messages = () => {
 
   // Send message to AI
   const handleSendMessage = async (text: string) => {
-    setIsPending(true);
+    setIsLoading(true);
     setIsError(false);
     setResponse("");
 
     setChatHistory((prev) => [...prev, { role: "user", parts: [{ text }] }]);
 
     let fullResponse = "";
-    if (!token) {
-      console.error("Token is missing");
-      setIsPending(false);
+    if (!token || !user.id) {
+      console.error("Token or user is missing");
       return;
     }
 
@@ -68,12 +68,19 @@ export const Messages = () => {
       // Save chat title if it's the first interaction
       if (chatHistory.length === 0) {
         const title = fullResponse.slice(0, 50).trim();
-        const { error } = await supabase
-          .from("history")
-          .insert({ title, user_id: user.id });
-        if (error) {
-          console.error("Error saving history:", error);
-        }
+
+        // Use the mutation to save history
+        mutate(
+          {
+            title,
+            userId: user.id,
+          },
+          {
+            onSuccess: () => {
+              console.log("History saved successfully");
+            },
+          }
+        );
       }
 
       // Append AI response to chat history
@@ -85,8 +92,8 @@ export const Messages = () => {
       console.error("Streaming error:", err);
       setIsError(true);
     } finally {
-      setIsPending(false);
       setResponse("");
+      setIsLoading(false);
     }
   };
 
@@ -132,7 +139,7 @@ export const Messages = () => {
         <InputArea
           onSend={handleSendMessage}
           onClear={() => setChatHistory([])}
-          isPending={isPending}
+          isPending={isPending || isLoading}
         />
       </div>
     </div>

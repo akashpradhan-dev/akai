@@ -8,8 +8,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Image from "next/image";
-import { supabase } from "@/utils/superbase/client";
 import Link from "next/link";
+import { useSignUpMutation } from "@/services/mutation/signUp";
+import { Spinner } from "@/components/Spinner";
 
 interface SignupProps {
   className?: string;
@@ -22,16 +23,14 @@ interface FormData {
 }
 
 export function Signup({ className, ...props }: SignupProps) {
-  // const { login } = useAuth();
   const router = useRouter();
+  const { mutate, isPending } = useSignUpMutation();
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
     fullName: "",
   });
   const [error, setError] = useState<string | null>(null);
-
-  // const { mutate, isPending } = useSignInMutation();
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -48,29 +47,28 @@ export function Signup({ className, ...props }: SignupProps) {
     }
     setError(null);
 
-    const { data, error } = await supabase.auth.signUp({
-      email: formData.email,
-      password: formData.password,
-      options: {
-        data: {
-          name: formData.fullName,
-        },
+    mutate(
+      {
+        email: formData.email,
+        password: formData.password,
+        name: formData.fullName,
       },
-    });
-
-    if (error) {
-      setError(error.message);
-      return;
-    }
-
-    if (data.user) {
-      toast.success("Signup successful : please proceed with login", {
-        position: "top-right",
-        richColors: true,
-      });
-
-      router.replace("/login");
-    }
+      {
+        onSuccess: () => {
+          toast.success(
+            "Verification email sent. Please confirm to activate your account.",
+            {
+              position: "top-right",
+              richColors: true,
+            }
+          );
+          router.replace("/login");
+        },
+        onError: (error) => {
+          setError(error.message);
+        },
+      }
+    );
   };
 
   return (
@@ -80,9 +78,9 @@ export function Signup({ className, ...props }: SignupProps) {
           <form className="p-6 md:p-8">
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold">Welcome</h1>
+                <h1 className="text-2xl font-bold">Signup</h1>
                 <p className="text-muted-foreground text-balance">
-                  Signup to continue your journey
+                  Create an account to get started
                 </p>
               </div>
 
@@ -123,6 +121,7 @@ export function Signup({ className, ...props }: SignupProps) {
                   name="password"
                   onChange={handleInputChange}
                   value={formData?.password}
+                  placeholder="*********"
                 />
               </div>
               {error && <div className="text-red-500 text-sm">{error}</div>}
@@ -130,16 +129,15 @@ export function Signup({ className, ...props }: SignupProps) {
                 type="button"
                 onClick={handleSubmit}
                 className="w-full"
-                // disabled={isPending}
+                disabled={isPending}
               >
                 Signup
-                {/* {isPending && "..."} */}
+                {isPending && <Spinner className="h-4 w-4" />}
               </Button>
               <span className="text-center text-sm">
-                already have an account?
+                Already have an account?
                 <Link className="text-blue-400" href={"/login"}>
-                  {" "}
-                  login
+                  Login
                 </Link>
               </span>
             </div>
@@ -147,8 +145,9 @@ export function Signup({ className, ...props }: SignupProps) {
           <div className="bg-primary/50 relative hidden md:block">
             <div className="absolute inset-0 bg-[#000] opacity-90">
               <Image
-                fill
-                src="/ai-homepage.webp"
+                width={500}
+                height={500}
+                src="/signup.jpg"
                 alt="Image"
                 className="absolute inset-0 h-full w-full object-cover"
               />

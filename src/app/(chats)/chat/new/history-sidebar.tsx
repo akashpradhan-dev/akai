@@ -1,40 +1,15 @@
 "use client";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/utils/superbase/client";
-import React, { useEffect, useState } from "react";
-
-export interface History {
-  created_at: string;
-  id: string;
-  user_id: string;
-  title: string;
-}
+import { useGetHistory } from "@/services/querys/getHistory";
 
 export const HistorySidebar = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
-  const [history, setHistory] = useState<History[]>([]);
-  const [loading, setLoading] = useState(false);
-  useEffect(() => {
-    const fetchHistory = async () => {
-      const { data } = await supabase
-        .from("history")
-        .select("*")
-        .eq("user_id", user?.id)
-        .order("created_at", { ascending: false });
-      setHistory(data ?? []);
-    };
-
-    if (user?.id) {
-      setLoading(true);
-      fetchHistory();
-      setLoading(false);
-    }
-  }, [user?.id]);
+  const { data, error, isPending } = useGetHistory({ userId: user?.id || "" });
 
   return (
     <>
-      <AppSidebar history={history} loading={loading} />
+      <AppSidebar history={data} loading={isPending} error={error} />
       <>{children}</>
     </>
   );

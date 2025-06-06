@@ -15,15 +15,21 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { History } from "@/app/(chats)/chat/new/history-sidebar";
 import { Spinner } from "./Spinner";
+import { History } from "@/services/querys/getHistory";
 
 interface AppSidebarProps {
-  history?: History[];
+  history?: History[] | null;
   loading?: boolean;
+  error?: Error | null;
 }
 
-export function AppSidebar({ history, loading, ...props }: AppSidebarProps) {
+export function AppSidebar({
+  history,
+  loading,
+  error,
+  ...props
+}: AppSidebarProps) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -43,8 +49,23 @@ export function AppSidebar({ history, loading, ...props }: AppSidebarProps) {
       </SidebarHeader>
 
       <SidebarContent>
-        {loading ? <Spinner /> : <NavDocuments items={history ?? []} />}
+        {error && (
+          <div>
+            <p className="text-red-500">
+              Error loading history: {error.message}
+            </p>
+          </div>
+        )}
+
+        {loading ? (
+          <div className="flex items-center justify-center">
+            <Spinner />
+          </div>
+        ) : (
+          <NavDocuments items={history ?? []} />
+        )}
       </SidebarContent>
+
       <SidebarFooter>
         <NavUser />
       </SidebarFooter>

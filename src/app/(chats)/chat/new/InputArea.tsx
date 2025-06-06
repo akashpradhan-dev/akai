@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
 import { Prompts } from "./Prompts";
+import { Spinner } from "@/components/Spinner";
 
 interface InputAreaProps {
   onSend: (text: string) => void;
@@ -25,31 +26,18 @@ export const InputArea = ({ onSend, onClear, isPending }: InputAreaProps) => {
       <div className="flex gap-2 mt-4 w-full items-center justify-center flex-col md:flex-row">
         <Prompts onChange={setPrompt} value={prompt} />
         <Button
-          className="w-full md:flex-1"
+          className="w-full md:flex-1 disabled:cursor-not-allowed"
           variant="default"
           onClick={() => {
             onSend(`${prompt} ${value}`.trim());
             setValue("");
           }}
-          disabled={isPending}
+          disabled={true}
         >
-          {isPending ? (
-            <svg
-              className="animate-spin h-5 w-5 text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-            >
-              <path
-                fill="currentColor"
-                d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8.009,8.009,0,0,1,12,20Z"
-              />
-            </svg>
-          ) : (
-            <span className="text-sm font-medium">Generate Chart </span>
-          )}
+          Generate {isPending && <Spinner />}
         </Button>
         <Button
-          className="w-full flex md:w-16"
+          className="w-full flex md:w-16 disabled:cursor-not-allowed"
           variant="outline"
           onClick={() => {
             onClear();
