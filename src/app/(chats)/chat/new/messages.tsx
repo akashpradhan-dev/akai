@@ -10,6 +10,7 @@ import { fetchAiResponse } from "@/services/mutation/fetchStreamingResponse";
 import { Message } from "./message";
 import { InputArea } from "./InputArea";
 import { useHistoryMutation } from "@/services/mutation/saveHistory";
+import { useMessageMutation } from "@/services/mutation/saveMessage";
 
 type Role = "user" | "bot";
 
@@ -24,10 +25,10 @@ export const Messages = () => {
   const [response, setResponse] = useState("");
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [chatId, setChatId] = useState("");
   const { user, loading, token } = useAuth();
-  const { isPending, mutate } = useHistoryMutation();
-
+  const { isPending, mutate: saveHistory } = useHistoryMutation();
+  const { mutate: saveMessage } = useMessageMutation();
   // Redirect if not authenticated
   useEffect(() => {
     if (!loading && !user?.email) {
@@ -42,17 +43,17 @@ export const Messages = () => {
 
   // Send message to AI
   const handleSendMessage = async (text: string) => {
+    if (!token || !user?.id) return;
+
     setIsLoading(true);
     setIsError(false);
     setResponse("");
 
-    setChatHistory((prev) => [...prev, { role: "user", parts: [{ text }] }]);
+    const newUserMessage: Message = { role: "user", parts: [{ text }] };
+    const updatedHistory = [...chatHistory, newUserMessage];
+    setChatHistory(updatedHistory);
 
     let fullResponse = "";
-    if (!token || !user.id) {
-      console.error("Token or user is missing");
-      return;
-    }
 
     try {
       await fetchAiResponse(
@@ -62,38 +63,51 @@ export const Messages = () => {
           fullResponse += chunk;
           setResponse(fullResponse);
         },
-        [...chatHistory.slice(-5)]
+        [...updatedHistory.slice(-5)]
       );
 
-      // Save chat title if it's the first interaction
-      if (chatHistory.length === 0) {
-        const title = fullResponse.slice(0, 50).trim();
+      const botMessage: Message = {
+        role: "bot",
+        parts: [{ text: fullResponse }],
+      };
+      const finalHistory = [...updatedHistory, botMessage];
+      setChatHistory(finalHistory);
 
-        // Use the mutation to save history
-        mutate(
+      //row per message
+      const content = {
+        user: newUserMessage,
+        bot: botMessage,
+      };
+
+      // Save history if it's the first message
+      if (!chatId) {
+        const title = fullResponse.slice(0, 50).trim();
+        saveHistory(
+          { title, userId: user.id },
           {
-            title,
-            userId: user.id,
-          },
-          {
-            onSuccess: () => {
-              console.log("History saved successfully");
+            onSuccess: (data) => {
+              const id = data[0]?.id;
+              setChatId(id);
+
+              saveMessage({
+                chat_id: id,
+                content: content,
+              });
             },
           }
         );
+      } else {
+        saveMessage({
+          chat_id: chatId,
+          content: content,
+        });
       }
-
-      // Append AI response to chat history
-      setChatHistory((prev) => [
-        ...prev,
-        { role: "bot", parts: [{ text: fullResponse }] },
-      ]);
     } catch (err) {
       console.error("Streaming error:", err);
       setIsError(true);
     } finally {
-      setResponse("");
       setIsLoading(false);
+      setResponse("");
     }
   };
 

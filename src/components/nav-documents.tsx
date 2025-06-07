@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sidebar";
 import { History } from "@/services/querys/getHistory";
 import { HistoryActions } from "./HistoryActions";
+import Link from "next/link";
 
 interface NavDocumentsProps {
   items: History[];
@@ -40,9 +41,9 @@ export function NavDocuments({ items }: NavDocumentsProps) {
         {items.map((item) => (
           <SidebarMenuItem key={item.id}>
             <SidebarMenuButton asChild>
-              <a href={"#"}>
+              <Link href={`/chat/${item.id}`}>
                 <span>{item.title}</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
