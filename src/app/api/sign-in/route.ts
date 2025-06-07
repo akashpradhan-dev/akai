@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -19,9 +18,7 @@ export async function POST(request: NextRequest) {
       (password === process.env.ADMIN_PASSWORD ||
         process.env.NEXT_PUBLIC_GUEST_PASSWORD)
     ) {
-      const token = jwt.sign({ email }, process.env.JWT_SECRET!, {
-        expiresIn: "1h",
-      });
+      const token = "";
 
       return NextResponse.json(
         {
